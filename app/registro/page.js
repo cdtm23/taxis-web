@@ -1,7 +1,10 @@
+import { Suspense } from 'react'
 import RegistroClient from './RegistroClient'
 
-export const dynamic = 'force-dynamic'
-
 export default function Page() {
-  return <RegistroClient />
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <RegistroClient />
+    </Suspense>
+  )
 }

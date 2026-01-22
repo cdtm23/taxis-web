@@ -1,8 +1,8 @@
 'use client'
 
-import { supabase } from '@/lib/supabase'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
 export default function Registro() {
