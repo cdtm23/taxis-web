@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  
+  // Configuración para Next.js 16
   images: {
     unoptimized: true
   },
@@ -10,6 +9,10 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  // Configuración adicional recomendada para Next 16
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 };
 
