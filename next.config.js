@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // DESACTIVAR output: 'export' - usar SSR normal
   output: 'standalone',
   
   images: {
