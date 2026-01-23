@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "lint": "eslint"
+    "build": "next build && next export",
+    "start": "next start",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",
