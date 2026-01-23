@@ -31,12 +31,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Cloudflare Pages
-.wrangler/
-.cache/
-.next/cache/
-.next/standalone/
-.next/server/chunks/
-.next/server/pages-manifest.json
-.next/server/middleware-manifest.json
