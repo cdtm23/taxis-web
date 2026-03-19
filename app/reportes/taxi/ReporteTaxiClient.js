@@ -196,6 +196,30 @@ export default function ReporteTaxi() {
     window.URL.revokeObjectURL(url)
   }
 
+  // FUNCIÓN CORREGIDA: Formatear fecha correctamente
+  const formatearFecha = (fechaStr) => {
+    // La fecha viene como YYYY-MM-DD de la BD
+    const [year, month, day] = fechaStr.split('T')[0].split('-')
+    
+    // Crear fecha local sin desfase horario
+    const fecha = new Date(year, month - 1, day)
+    
+    return {
+      completa: fecha.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      corta: fecha.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      dia: fecha.toLocaleDateString('es-ES', { weekday: 'long' })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
@@ -346,7 +370,7 @@ export default function ReporteTaxi() {
                       ID: {getTaxiActual().id.substring(0, 8)}...
                     </span>
                     <span className="inline-block bg-blue-200 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
-                      Creado: {new Date(getTaxiActual().created_at).toLocaleDateString('es-ES')}
+                      Creado: {new Date(getTaxiActual().created_at + 'T12:00:00').toLocaleDateString('es-ES')}
                     </span>
                   </div>
                 </div>
@@ -411,7 +435,7 @@ export default function ReporteTaxi() {
           </div>
         )}
 
-        {/* MEJOR Y PEOR DÍA */}
+        {/* MEJOR Y PEOR DÍA - CORREGIDO */}
         {taxiSeleccionado && estadisticas && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-gradient-to-r from-emerald-50 to-green-100 border border-green-200 rounded-2xl p-6">
@@ -421,13 +445,8 @@ export default function ReporteTaxi() {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 text-lg">Mejor Día</h3>
-                  <p className="text-gray-600 text-sm">
-                    {new Date(estadisticas.mejorDia.fecha).toLocaleDateString('es-ES', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                  <p className="text-gray-600 text-sm capitalize">
+                    {formatearFecha(estadisticas.mejorDia.fecha).completa}
                   </p>
                 </div>
               </div>
@@ -448,13 +467,8 @@ export default function ReporteTaxi() {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 text-lg">Peor Día</h3>
-                  <p className="text-gray-600 text-sm">
-                    {new Date(estadisticas.peorDia.fecha).toLocaleDateString('es-ES', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                  <p className="text-gray-600 text-sm capitalize">
+                    {formatearFecha(estadisticas.peorDia.fecha).completa}
                   </p>
                 </div>
               </div>
@@ -470,7 +484,7 @@ export default function ReporteTaxi() {
           </div>
         )}
 
-        {/* HISTORIAL DE REGISTROS */}
+        {/* HISTORIAL DE REGISTROS - CORREGIDO */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 flex items-center">
@@ -520,41 +534,40 @@ export default function ReporteTaxi() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {registrosTaxi.map((registro) => (
-                    <tr key={registro.id} className="hover:bg-gray-50 transition">
-                      <td className="p-4">
-                        <div className="font-medium text-gray-900">
-                          {new Date(registro.fecha).toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-bold text-green-600 text-lg">
-                          ${parseFloat(registro.cantidad).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-gray-700 max-w-xs truncate">
-                          {registro.notas || '-'}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-gray-600">
-                          {new Date(registro.fecha).toLocaleDateString('es-ES', { weekday: 'long' })}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {registrosTaxi.map((registro) => {
+                    const fechaFormateada = formatearFecha(registro.fecha)
+                    return (
+                      <tr key={registro.id} className="hover:bg-gray-50 transition">
+                        <td className="p-4">
+                          <div className="font-medium text-gray-900 capitalize">
+                            {fechaFormateada.corta}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="font-bold text-green-600 text-lg">
+                            ${parseFloat(registro.cantidad).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="text-gray-700 max-w-xs truncate">
+                            {registro.notas || '-'}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="text-gray-600 capitalize">
+                            {fechaFormateada.dia}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
           )}
         </div>
 
-        {/* EVOLUCIÓN POR MESES */}
+        {/* EVOLUCIÓN POR MESES - CORREGIDO */}
         {taxiSeleccionado && estadisticas?.porMes && estadisticas.porMes.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -563,37 +576,43 @@ export default function ReporteTaxi() {
             </h2>
             
             <div className="space-y-6">
-              {estadisticas.porMes.map((mesData) => (
-                <div key={mesData.mes} className="border border-gray-200 rounded-xl p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-gray-900">
-                      {new Date(mesData.mes + '-01').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
-                    </h3>
-                    <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                      {mesData.cantidad} día{mesData.cantidad !== 1 ? 's' : ''}
-                    </span>
+              {estadisticas.porMes.map((mesData) => {
+                const [year, month] = mesData.mes.split('-')
+                const fechaMes = new Date(year, month - 1, 1)
+                const nombreMes = fechaMes.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+                
+                return (
+                  <div key={mesData.mes} className="border border-gray-200 rounded-xl p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-bold text-gray-900 capitalize">
+                        {nombreMes}
+                      </h3>
+                      <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                        {mesData.cantidad} día{mesData.cantidad !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Total del mes</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          ${mesData.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Promedio por día</p>
+                        <p className="text-2xl font-bold text-blue-600">
+                          ${mesData.promedio.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Días trabajados</p>
+                        <p className="text-2xl font-bold text-purple-600">{mesData.cantidad}</p>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <p className="text-sm text-gray-600">Total del mes</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        ${mesData.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-gray-600">Promedio por día</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        ${mesData.promedio.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-gray-600">Días trabajados</p>
-                      <p className="text-2xl font-bold text-purple-600">{mesData.cantidad}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
