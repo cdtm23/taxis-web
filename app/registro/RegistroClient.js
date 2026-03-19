@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export default function Registro() {
   const [cantidad, setCantidad] = useState('')
-  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
+  const [fecha, setFecha] = useState('')
   const [notas, setNotas] = useState('')
   const [taxis, setTaxis] = useState([])
   const [taxiSeleccionado, setTaxiSeleccionado] = useState('')
@@ -21,6 +21,14 @@ export default function Registro() {
     if (taxiId) {
       setTaxiSeleccionado(taxiId)
     }
+    
+    // CORREGIDO: Fecha local sin problemas de zona horaria
+    const hoy = new Date()
+    const year = hoy.getFullYear()
+    const month = String(hoy.getMonth() + 1).padStart(2, '0')
+    const day = String(hoy.getDate()).padStart(2, '0')
+    setFecha(`${year}-${month}-${day}`)
+    
     fetchTaxis()
   }, [])
 
@@ -77,7 +85,7 @@ export default function Registro() {
       .from('registros')
       .insert([{ 
         taxi_id: taxiSeleccionado, 
-        fecha, 
+        fecha, // CORREGIDO: Ya es YYYY-MM-DD local
         cantidad: parseFloat(cantidad),
         notas: notas.trim() || null
       }])
@@ -190,7 +198,7 @@ export default function Registro() {
               )}
             </div>
 
-            {/* FECHA */}
+            {/* FECHA - CORREGIDO */}
             <div>
               <label className="block text-gray-900 font-bold mb-2">
                 <span className="flex items-center">
@@ -205,7 +213,6 @@ export default function Registro() {
                   onChange={(e) => setFecha(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-gray-900 text-lg"
                   required
-                  max={new Date().toISOString().split('T')[0]}
                 />
                 <div className="absolute right-3 top-3 text-gray-500 text-xl">
                   📅
@@ -265,7 +272,7 @@ export default function Registro() {
               </p>
             </div>
 
-            {/* RESUMEN DEL REGISTRO */}
+            {/* RESUMEN DEL REGISTRO - CORREGIDO */}
             <div className="bg-gradient-to-r from-green-50 to-emerald-100 border border-green-200 rounded-xl p-5">
               <h3 className="font-bold text-green-800 mb-3 flex items-center">
                 <span className="mr-2">📋</span>
@@ -281,11 +288,12 @@ export default function Registro() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700">Fecha:</span>
                   <span className="font-bold text-gray-900 text-lg">
-                    {fecha ? new Date(fecha).toLocaleDateString('es-ES', {
+                    {fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-ES', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
+                      timeZone: 'America/Bogota'
                     }) : 'No seleccionada'}
                   </span>
                 </div>
@@ -383,7 +391,11 @@ export default function Registro() {
             <div className="bg-white/10 p-4 rounded-xl">
               <p className="text-sm opacity-80">Fecha</p>
               <p className="text-lg font-bold mt-2">
-                {new Date(fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                {fecha ? new Date(fecha + 'T12:00:00').toLocaleDateString('es-ES', { 
+                  day: '2-digit', 
+                  month: 'short',
+                  timeZone: 'America/Bogota'
+                }) : ''}
               </p>
             </div>
             <div className="bg-white/10 p-4 rounded-xl">
